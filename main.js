@@ -163,14 +163,12 @@ function renderPerformances(){
     thumb.appendChild(label);
 
     thumb.addEventListener('click', function(){
+      var modal = document.getElementById('videoModal');
+      var player = document.getElementById('videoModalPlayer');
+      
       if (p.youtubeId) {
-        var iframe = document.createElement('iframe');
-        iframe.src = 'https://www.youtube-nocookie.com/embed/' + p.youtubeId + '?autoplay=1';
-        iframe.title = p.title;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        card.innerHTML = '';
-        card.appendChild(iframe);
+        player.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + p.youtubeId + '?autoplay=1" title="' + p.title + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+        modal.hidden = false;
       } else if (p.instagramUrl) {
         window.open(p.instagramUrl, '_blank');
       }
@@ -181,6 +179,24 @@ function renderPerformances(){
   });
 }
 renderPerformances();
+
+/* video modal close handlers */
+(function(){
+  var modal = document.getElementById('videoModal');
+  var closeButtons = document.querySelectorAll('[data-close]');
+  closeButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      modal.hidden = true;
+      document.getElementById('videoModalPlayer').innerHTML = '';
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !modal.hidden) {
+      modal.hidden = true;
+      document.getElementById('videoModalPlayer').innerHTML = '';
+    }
+  });
+})();
 
 /* ---------------------------------------------------------
    WORKSHOPS — data-driven cards
@@ -232,40 +248,3 @@ function renderMedia(){
   });
 }
 renderMedia();
-
-/* ---------------------------------------------------------
-   CONTACT FORM — Formspree submission with success state
---------------------------------------------------------- */
-(function initContactForm(){
-  var form = document.getElementById('contactForm');
-  var status = document.getElementById('formStatus');
-  var success = document.getElementById('formSuccess');
-
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-
-    if (form.action.indexOf('YOUR_FORMSPREE_ID') !== -1) {
-      status.textContent = 'Form not yet connected — set your Formspree endpoint in index.html (see README).';
-      return;
-    }
-
-    status.textContent = 'Sending…';
-    var data = new FormData(form);
-
-    fetch(form.action, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    }).then(function(response){
-      if (response.ok) {
-        form.hidden = true;
-        status.textContent = '';
-        success.hidden = false;
-      } else {
-        status.textContent = "Something went wrong — please email etamler@gmail.com directly.";
-      }
-    }).catch(function(){
-      status.textContent = "Something went wrong — please email etamler@gmail.com directly.";
-    });
-  });
-})();
